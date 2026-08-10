@@ -4,14 +4,43 @@
     <meta charset="UTF-8">
     <meta name="3D Rotating Color Cube" content="width=device-width, initial-scale=1.0">
     <title>3D Rotating Color Cube</title>
-
-    <!-- Include the WebGL utility library -->
-    <script src="webgl-demo.js" type="module"></script>
 </head>
 
 <body>
     <!-- Declare the canvas the cube will be drawn on -->
     <canvas id="gl-canvas" width="500" height="500"></canvas>
+
+    
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 aPosition;
+        attribute vec4 aColor;
+
+        uniform mat4 uModelViewMatrix;
+
+        varying vec4 vColor;
+
+        void main()
+        {
+            gl_Position = uModelViewMatrix * aPosition;
+            vColor = aColor;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+
+        varying vec4 vColor;
+
+        void main()
+        {
+            gl_FragColor = vColor;
+        }
+    </script>
+
+    <script src="WebGLUtils.js"></script>
+    <script src="initShaders.js"></script>
+    <script src="MV.js"></script>
+    <script src="cube.js"></script>
 </body>
 
 </html>
