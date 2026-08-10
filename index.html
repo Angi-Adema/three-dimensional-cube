@@ -10,36 +10,55 @@
     <!-- Declare the canvas the cube will be drawn on -->
     <canvas id="gl-canvas" width="500" height="500"></canvas>
 
-    
+    <!-- Create the vertex shader (processes each vertex) -->
     <script id="vertex-shader" type="x-shader/x-vertex">
+        // Get current vertex position and color from webgl-cube.js 
         attribute vec4 aPosition;
         attribute vec4 aColor;
 
+        // Transformation matrix to rotate the cube
         uniform mat4 uModelViewMatrix;
 
+        // Pass the color to the fragment shader
         varying vec4 vColor;
 
+        // Main function that runs for each vertex
         void main()
         {
+            // Transform the vertex position by the model-view matrix
             gl_Position = uModelViewMatrix * aPosition;
+
+            // Store the vertex color to be passed to the fragment shader
             vColor = aColor;
         }
     </script>
 
+    <!-- Create the fragment shader (pixels used to draw the cube) -->
     <script id="fragment-shader" type="x-shader/x-fragment">
+        // Set medium floating-point precision for the fragment shader
         precision mediump float;
 
+        // Get interpolated color from the vertex shader
         varying vec4 vColor;
 
+        // Main function that runs for each pixel
         void main()
         {
+            // Set the final color of the pixel to the interpolated vertex color
             gl_FragColor = vColor;
         }
     </script>
 
+    <!-- WebGL helper functions -->
     <script src="WebGLUtils.js"></script>
+
+    <!-- Functions to compile and initialize shaders -->
     <script src="initShaders.js"></script>
+
+    <!-- Matrix and vector math library used by WebGL -->
     <script src="MV.js"></script>
+
+    <!-- JavaScript file for displaying the cube -->
     <script src="cube.js"></script>
 </body>
 
