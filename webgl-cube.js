@@ -20,10 +20,10 @@ var vertices = [
     [-0.5,  0.5,  0.5, 1.0],  // Vertex 1: front top left
     [0.5,  0.5,  0.5, 1.0],  // Vertex 2: front top right
     [0.5, -0.5,  0.5, 1.0],  // Vertex 3: front bottom right
-    [0.5,  0.5, -0.5, 1.0],  // Vertex 4: back bottom left
-    [0.5, -0.5, -0.5, 1.0],  // Vertex 5: back bottom right
-    [-0.5, -0.5, -0.5, 1.0],  // Vertex 6: back top right
-    [-0.5,  0.5, -0.5, 1.0],  // Vertex 7: back bottom right
+    [-0.5,  -0.5, -0.5, 1.0],  // Vertex 4: back bottom left
+    [-0.5, 0.5, -0.5, 1.0],  // Vertex 5: back top left
+    [0.5, 0.5, -0.5, 1.0],  // Vertex 6: back top right
+    [0.5, -0.5, -0.5, 1.0],  // Vertex 7: back bottom right
 ];
 
 // Colors of cube faces, each represented as a 4D vector (r, g, b, a)
