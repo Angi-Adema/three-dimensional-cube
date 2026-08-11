@@ -1,32 +1,33 @@
 // Use strict helps catch errors while coding
 "use strict";
 
-// Declare the WebGL context
+// Declare gl globally to store the WebGL rendering context
 var gl;
 
-// Create an arrays to store cube vertex positions and colors
+// Create empty arrays to store cube vertex positions and colors of the cube
 var points = [];
 var colors = [];
 
-// Set the initial rotation angle for the cube
+// Store the current rotation angle of the cube, initially set to 0.0 degrees
 var theta = 0.0;
 
 // Declare a variable to hold the location of the model-view matrix uniform in the shader program
 var modelViewMatrixLoc;
 
-// Create the eight vertices of the cube front square and back square, each represented as a 4D vector (x, y, z, w)
+// Create the eight vertices or corners of the cube as 4D vertex positions (x, y, z, w)
 var vertices = [
-    [-0.5, -0.5,  0.5, 1.0],  // Vertex 0: front bottom left
-    [-0.5,  0.5,  0.5, 1.0],  // Vertex 1: front top left
-    [0.5,  0.5,  0.5, 1.0],  // Vertex 2: front top right
-    [0.5, -0.5,  0.5, 1.0],  // Vertex 3: front bottom right
-    [-0.5,  -0.5, -0.5, 1.0],  // Vertex 4: back bottom left
+    [-0.5, -0.5, 0.5, 1.0],  // Vertex 0: front bottom left
+    [-0.5, 0.5, 0.5, 1.0],   // Vertex 1: front top left
+    [0.5, 0.5, 0.5, 1.0],    // Vertex 2: front top right
+    [0.5, -0.5, 0.5, 1.0],   // Vertex 3: front bottom right
+    [-0.5, -0.5, -0.5, 1.0], // Vertex 4: back bottom left
     [-0.5, 0.5, -0.5, 1.0],  // Vertex 5: back top left
-    [0.5, 0.5, -0.5, 1.0],  // Vertex 6: back top right
+    [0.5, 0.5, -0.5, 1.0],   // Vertex 6: back top right
     [0.5, -0.5, -0.5, 1.0],  // Vertex 7: back bottom right
 ];
 
 // Colors of cube faces, each represented as a 4D vector (r, g, b, a)
+// Each color is made up of red, green, blue, and alpha (opacity) components, with values ranging from 0.0 to 1.0
 var vertexColors = [
     [0.961, 0.569, 0.988, 1.0],  // #F591FC
     [0.839, 0.039, 0.980, 1.0],  // #D60AFA
@@ -38,119 +39,129 @@ var vertexColors = [
     [0.259, 0.878, 0.682, 1.0]   // #42E0AE
 ];
 
-// Run init functions after the page has loaded to ensure the canvas is available
+// Once the web page has fully loaded, run the init function to set up WebGL, create the cube, and start the rendering loop
 window.onload = function init()
 {   
     // Retrieve canvas element from the HTML document by its ID
     var canvas = document.getElementById("glCanvas");
 
-    // Create the WebGL rendering context
+    // Create the WebGL rendering context and store it in the global variable established above
     gl = canvas.getContext("webgl");
 
-    // Error handling to ensure WebGL is available
+    // Confirm if the WebGL context was successfully created; if not, display an alert to the user indicating that WebGL is not available in their browser
     if (!gl)
     {
-        // Display alert is WebGL is not available in the user's browser
+        // Display an alert if WebGL is not available in the user's browser
         alert("WebGL is not available.");
     }
 
-    // Create the six face cube by calling the colorCube function, which generates the vertex positions and colors for each face of the cube
+    // Generate the six sides of the cube placing their vertex positions and colors into the points and colors arrays
     colorCube();
 
-    // Set the viewport to match the canvas dimensions, clear the color buffer with a light gray color, and enable depth testing for proper 3D rendering
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clearColor(0.9, 0.9, 0.9, 1.0);
+    // Define the canvas area that WebGL will use to render the cube. 
+    gl.viewport(
+        0,                // Begin at the left edge of the canvas
+        0,                // Begin at the bottom edge of the canvas
+        canvas.width,     // Use the full canvas width
+        canvas.height);   // Use the full canvas height
+
+    // Set the color to be used when the color buffer is cleared (background set to black)
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+    // Enable depth testing so that WebGL can correctly determine front surfaces from back surfaces when rendering
     gl.enable(gl.DEPTH_TEST);
 
-    // Create and compile the shader program, which contains the vertex and fragment shaders that will be used to render the cube
+    // Create, compile, and link the vertex and fragment shaders into a single program
     var program = createShaderProgram();
 
-    // Tell WebGL to use the shader program
+    // Instruct WebGL to use this shader program for rendering the cube
     gl.useProgram(program);
 
-    // Color buffer storing the cube's color data, which is sent to the GPU for rendering
+    // Create a WebGL buffer for storing the cube's color data, which will be sent to the GPU for rendering
     var cBuffer = gl.createBuffer();
 
-    // Bind the color buffer as the current array buffer
+    // Set the color buffer as the active ARRAY_BUFFER
     gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
 
-    // Load the color data into the color buffer on the GPU using the flatten function to convert the colors array into a format suitable for WebGL
+    // Load the cube's color values into the currently bound WebGL buffer
     gl.bufferData(
-        gl.ARRAY_BUFFER,
-        flatten(colors),
-        gl.STATIC_DRAW
+        gl.ARRAY_BUFFER,   // Store the data in the active array buffer
+        flatten(colors),   // Convert the nested color arrays to a flat Float32Array for WebGL
+        gl.STATIC_DRAW     // Indicate that the data will not change frequently, allowing WebGL to optimize its storage and access
     );
 
-    // Locate the aColor attribute in the shader program and enable it to receive color data from the color buffer
+    // Locate the aColor attribute in the shader program
     var aColor = gl.getAttribLocation(program, "aColor");
     
-    // Specify how the color data is stored in the buffer and how it should be interpreted by the shader program
+    // Specify how WebGL should read the color data from the active color buffer
     gl.vertexAttribPointer(
-        aColor,    // Shader attribute location
+        aColor,    // Location of the aColor attribute
         4,         // Four values for each color (r, g, b, a)
-        gl.FLOAT,  // Each value is a floating-point number
+        gl.FLOAT,  // Each value is stored as a floating-point number
         false,     // Ensure values are not normalized
-        0,         // Default spacing between consecutive colors in the buffer
+        0,         // Colors are stored directly next to each other in the buffer with no spacing
         0          // Start reading from the beginning of the buffer
     );
+    
     // Enable the aColor attribute to allow the shader program to access the color data for rendering
     gl.enableVertexAttribArray(aColor);
 
-    // Create a buffer to store the cube's vertex positions, which will be sent to the GPU for rendering
+    // Create a WebGL buffer to store the cube's vertex positions
     var vBuffer = gl.createBuffer();
 
-    // Bind the position buffer as the current array buffer, allowing subsequent operations to affect this buffer
+    // Set the vertex-position buffer as the active ARRAY_BUFFER, allowing WebGL to know where to read the vertex position data from
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
 
     // Copy the vertex positions data into the position buffer using the flatten function to convert the points
     gl.bufferData(
         gl.ARRAY_BUFFER,
         flatten(points),
-        gl.STATIC_DRAW
+        gl.STATIC_DRAW   // Data is static and will not change frequently
     );
 
-    // Locate the aPosition attribute in the shader program and enable it to receive vertex position data from the position buffer
+    // Locate the aPosition attribute in the shader program
     var aPosition =
         gl.getAttribLocation(program, "aPosition");
 
-    // Specify how the vertex position data is stored in the buffer and how it should be interpreted by the shader program
+    // Specify how WebGL should read the vertex position data from the active position buffer
     gl.vertexAttribPointer(
         aPosition,  // Shader attribute location
         4,          // Four values for each vertex position (x, y, z, w)
         gl.FLOAT,   // Each value is a floating-point number
         false,      // Ensure values are not normalized
-        0,          // Default spacing between
+        0,          // Default spacing between (vertex positions right next to each other with no spacing)
         0           // Start reading from the beginning of the buffer
     );
     // Enable the aPosition attribute to allow the shader program to access the vertex position data for rendering
     gl.enableVertexAttribArray(aPosition);
 
-    //Find the model-view matrix uniform location in the shader program, which will be used to apply transformations to the cube during rendering
+    //Find the model-view matrix uniform location in the shader program and store it so the rotation matrix can be sent to the shader
     modelViewMatrixLoc =
         gl.getUniformLocation(
             program,
             "uModelViewMatrix"
         );
 
-    // Start the rendering loop by calling the render function, which will continuously update the cube's rotation and redraw it on the canvas
+    // Draw the first frame and start the continuous animation loop
     render();
 };
 
 // Generate all six faces of the cube by calling the quad function for each face, specifying the indices of the vertices that make up each face
 function colorCube()
 {
-    quad(1, 0, 3, 2);
-    quad(2, 3, 7, 6);
-    quad(3, 0, 4, 7);
-    quad(6, 5, 1, 2);
-    quad(4, 5, 6, 7);
-    quad(5, 4, 0, 1);
+    quad(1, 0, 3, 2);   // Front face (vertices: 1, 0, 3, 2)
+    quad(2, 3, 7, 6);   // Right face (vertices: 2, 3, 7, 6)
+    quad(3, 0, 4, 7);   // Bottom face (vertices: 3, 0, 4, 7)
+    quad(6, 5, 1, 2);   // Top face (vertices: 6, 5, 1, 2)
+    quad(4, 5, 6, 7);   // Back face (vertices: 4, 5, 6, 7)
+    quad(5, 4, 0, 1);   // Left face (vertices: 5, 4, 0, 1)
 }
 
-// Create two triangles for each face of the cube by specifying the indices of the vertices that make up the triangles, and store the vertex positions and colors in the points and colors arrays
+// Divide one square cube face into two triangles
 function quad(a, b, c, d)
 {
-    // Square face is divided into two triangles, and the indices of the vertices for each triangle are specified in the indices array
+    // Store the six vertex indices needed to create the two triangles.
+    // Triangle 1 uses a, b, c and triangle 2 uses a, c, d. This ensures that the two triangles together form a square face of the cube.
     var indices = [
         a, b, c,
         a, c, d
@@ -159,8 +170,8 @@ function quad(a, b, c, d)
     // Loop through the six vertex indices for the two triangles, and for each index, push the corresponding vertex position and color into the points and colors arrays
     for (var i = 0; i < indices.length; i++)
     {
-        points.push(vertices[indices[i]]);
-        colors.push(vertexColors[a]);
+        points.push(vertices[indices[i]]);   // Store corresponding vertex positions in the points array
+        colors.push(vertexColors[a]);        // Give each vertex of this face the same color, the first vertex index (a) sets the face color
     }
 }
 
@@ -184,88 +195,88 @@ function flatten(array)
     return new Float32Array(result);
 }
 
-// Create and compile the shader program
+// Create, compile, and link the vertex and fragment shaders
 function createShaderProgram()
 {
-    // Get the vertex shader code from the HTML page
+    // Get the vertex shader source code from the HTML page
     var vertexSource =
         document.getElementById("vertex-shader").text;
 
-    // Get the fragment shader code from the HTML page
+    // Get the fragment shader source code from the HTML page
     var fragmentSource =
         document.getElementById("fragment-shader").text;
 
-    // Create the vertex shader
+    // Create an empty WebGL vertex shader object to hold the compiled vertex shader code
     var vertexShader =
         gl.createShader(gl.VERTEX_SHADER);
 
-    // Add the vertex shader source code
+    // Add the vertex shader source code to the vertex shader object, preparing it for compilation
     gl.shaderSource(vertexShader, vertexSource);
 
-    // Compile the vertex shader
+    // Compile the vertex shader source code so the GPU can execute it
     gl.compileShader(vertexShader);
 
     // Check whether the vertex shader compiled correctly
     if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS))
     {
         console.log(
-            gl.getShaderInfoLog(vertexShader)
+            gl.getShaderInfoLog(vertexShader)  // Display the shader compiler error in the browser console if compilation failed
         );
     }
 
-    // Create the fragment shader
+    // Create an empty WebGL fragment shader object to hold the compiled fragment shader code
     var fragmentShader =
         gl.createShader(gl.FRAGMENT_SHADER);
 
-    // Add the fragment shader source code
+    // Add the fragment shader source code to the fragment shader object
     gl.shaderSource(fragmentShader, fragmentSource);
 
-    // Compile the fragment shader
+    // Compile the fragment shader source code so the GPU can execute it
     gl.compileShader(fragmentShader);
 
     // Check whether the fragment shader compiled correctly
     if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS))
     {
         console.log(
-            gl.getShaderInfoLog(fragmentShader)
+            gl.getShaderInfoLog(fragmentShader)   // Display the error to the browser console if the fragment shader compilation failed
         );
     }
 
-    // Create the shader program
+    // Create the shader program that will contain both shaders
     var program = gl.createProgram();
 
-    // Attach the vertex shader
+    // Attach the compiled vertex shader to the WebGL program
     gl.attachShader(program, vertexShader);
 
-    // Attach the fragment shader
+    // Attach the compiled fragment shader to the WebGL program
     gl.attachShader(program, fragmentShader);
 
-    // Link the shaders together
+    // Link the vertex and fragment shaders together into one usable program
     gl.linkProgram(program);
 
     // Check whether the program linked correctly
     if (!gl.getProgramParameter(program, gl.LINK_STATUS))
     {
         console.log(
-            gl.getProgramInfoLog(program)
+            gl.getProgramInfoLog(program)  // Display the error to the browser console if the program linking failed
         );
     }
 
-    // Return the finished shader program
+    // Return the finished shader program to the init function
     return program;
 }
 
-// Create a rotation matrix for the x-axis
+// Create a 4x4 matrix that represents rotation of the cube around the x-axis
 function rotateX(angle)
 {
-    // Convert degrees to radians
+    // Convert the rotation angle from degrees to radians as JavaScript's Math functions use radians
     var radians = angle * Math.PI / 180.0;
 
-    // Calculate cosine and sine values
+    // Calculate cosine and sine rotation angle values
     var c = Math.cos(radians);
     var s = Math.sin(radians);
 
-    // Return the rotation matrix
+    // Return the 4x4 x-axis rotation matrix
     return [
         1, 0, 0, 0,
         0, c, s, 0,
@@ -274,17 +285,17 @@ function rotateX(angle)
     ];
 }
 
-// Create a rotation matrix for the y-axis
+// Create a 4x4 matrix representing rotation around the y-axis
 function rotateY(angle)
 {
-    // Convert degrees to radians
+    // Convert degrees to radians for JavaScript's Math functions
     var radians = angle * Math.PI / 180.0;
 
-    // Calculate cosine and sine values
+    // Calculate cosine and sine values of the rotation angle
     var c = Math.cos(radians);
     var s = Math.sin(radians);
 
-    // Return the rotation matrix
+    // Return the 4x4 y-axis rotation matrix
     return [
         c, 0, -s, 0,
         0, 1, 0, 0,
@@ -293,20 +304,21 @@ function rotateY(angle)
     ];
 }
 
-// Multiply two 4x4 matrices
+// Multiply two 4x4 matrices and return the resulting 4x4 matrix
 function multiplyMatrices(a, b)
 {
+    // Create an array with 16 positions to store the resulting 4x4 matrix
     var result = new Array(16);
 
-    // Loop through each row
+    // Loop through each of the 4 matrix rows
     for (var row = 0; row < 4; row++)
     {
-        // Loop through each column
+        // Loop through each of the 4 matrix columns
         for (var column = 0; column < 4; column++)
         {
-            var sum = 0;
+            var sum = 0;  // Start the value for the current result position at 0
 
-            // Multiply and add matching values
+            // Multiply the matching row and column values and add the four products together to get the value for the current position in the result matrix
             for (var i = 0; i < 4; i++)
             {
                 sum +=
@@ -314,14 +326,16 @@ function multiplyMatrices(a, b)
                     b[column * 4 + i];
             }
 
+            // Store the calculated values in the appropriate position of the resulting matrix
             result[column * 4 + row] = sum;
         }
     }
 
+    // Return the completed combined transformation matrix
     return result;
 }
 
-// Draw the cube on the canvas by clearing the color and depth buffers, updating the rotation angle, calculating the model-view matrix, sending it to the shader program, and drawing the cube using the vertex data stored in the buffers. The render function is called repeatedly using requestAnimationFrame to create a smooth animation of the rotating cube.
+// Draw one frame of the cube and continuously repeat the process to animate the rotating cube
 function render()
 {
     // Clear the previous frame's color and depth information to prepare for drawing the new frame
@@ -337,27 +351,27 @@ function render()
     var xRotation = rotateX(theta);
     var yRotation = rotateY(theta);
 
-    // Create a matrix that rotates the cube on the x and y axes based on the current rotation angle, allowing the cube to appear as if it is spinning in 3D space
+    // Combine the x- and y-axis rotations into one transformation matrix
     var modelViewMatrix =
         multiplyMatrices(
             xRotation, // Rotate around x-axis
             yRotation  // Rotate around y-axis
         );
 
-    // Send the model-view matrix to the shader program, allowing the vertex positions to be transformed according to the current rotation before being rendered on the canvas
+    // Send the combined transformation matrix to the uModelViewMatrix uniform in the vertex shader
     gl.uniformMatrix4fv(
-        modelViewMatrixLoc,      // Location of the matrix in the shader
-        false,                   // Do not transpose the matrix
-        new Float32Array(modelViewMatrix)
+        modelViewMatrixLoc,                 // Location of uModelViewMatrix in the shader program
+        false,                              // WebGL expects this value to be false, indicating that the matrix is not transposed
+        new Float32Array(modelViewMatrix)   // Convert the matrix to WebGL-compatible data
     );
 
-    // Draw all 36 cube vertices as triangles, using the vertex data stored in the buffers and transformed by the model-view matrix to create the appearance of a rotating 3D cube on the canvas
+    // Draw the cube using all 36 vertices created by the colorCube and quad
     gl.drawArrays(
-        gl.TRIANGLES,
-        0,
-        36
+        gl.TRIANGLES,  // Each group of three vertices represents one triangle (2 triangles per cube face)
+        0,             // Start drawing from the first vertex in the points array
+        36             // Draw all 36 vertices or 12 triangles that make up the cube's six faces
     );
 
-    // Request another animation frame and run the render function again, creating a loop that continuously updates the cube's rotation and redraws it on the canvas for smooth animation
+    // Request the browser to call render again before displaying the next frame as this will create the continuous rotation animation
     requestAnimationFrame(render);
 }
