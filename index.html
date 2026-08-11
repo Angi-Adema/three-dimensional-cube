@@ -28,12 +28,10 @@
         // Main function that runs for each vertex
         void main()
         {
-            // Multiply the vertex position by the model-view matrix
-            // and store the transformed position in gl_Position
+            // Multiply the vertex position by the model-view matrix and store the transformed position
             gl_Position = uModelViewMatrix * aPosition;
 
-            // Assign the current vertex color to vColor so it can be
-            // passed to the fragment shader
+            // Assign the current vertex color to vColor so it can be passed to the fragment shader
             vColor = aColor;
         }
     </script>
