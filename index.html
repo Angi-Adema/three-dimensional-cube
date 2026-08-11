@@ -10,7 +10,7 @@
     <!-- Declare the canvas the cube will be drawn on -->
     <canvas id="glCanvas" width="500" height="500"></canvas>
 
-    <!-- Create the vertex shader (processes each vertex) -->
+    <!-- Create the vertex shader (handles vertex positions and transformations) -->
     <script id="vertex-shader" type="x-shader/x-vertex">
         // Get current vertex position and color from webgl-cube.js 
         attribute vec4 aPosition;
@@ -49,7 +49,7 @@
         }
     </script>
 
-    <!-- JavaScript file for displaying the cube -->
+    <!-- Connect the JavaScript file for displaying the cube -->
     <script src="webgl-cube.js"></script>
 </body>
 
