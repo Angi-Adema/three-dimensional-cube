@@ -1,3 +1,15 @@
+/*
+ * The interactive WebGL viewing controls and viewing-matrix logic in this program
+ * were adapted from the ortho2.js example provided with Chapter 5 of Interactive 
+ * Computer Graphics by Angel and Shreiner.
+ * 
+ * Source:
+ * https://www.interactivecomputergraphics.com/Code/05/ortho2.js
+ * 
+ * The colored-cube logic was adapted from the Chapter 4 textbook examples as well
+ * as project files provided with the textbook.
+ */
+
 // Use strict helps catch errors while coding
 "use strict";
 
