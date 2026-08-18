@@ -8,8 +8,21 @@ var gl;
 var points = [];
 var colors = [];
 
-// Store the current rotation angle of the cube, initially set to 0.0 degrees
+// Create variables to hold the rotation angles for the cube around the x- and y-axes 
+var radius = 1.0;
 var theta = 0.0;
+var phi = 0.0;
+
+// Store the calculated eye position
+var eye;
+
+// Ensure the camera is always looking at the center of the cube, which is at the origin (0, 0, 0) with y-axis as the up direction
+var at = vec3[0.0, 0.0, 0.0];
+var up = vec3[0.0, 1.0, 0.0];
+
+// Create variables to hold the model-view and projection matrices
+var modelViewMatrix;
+var projectionMatrix;
 
 // Create the orthographic viewing volume variables
 var left = -1.0;
@@ -364,19 +377,33 @@ function render()
         gl.DEPTH_BUFFER_BIT
     );
 
-    // Update the rotation angle for the next frame, creating a continuous rotation effect for the cube
-    theta += 0.5;
+    // // Update the rotation angle for the next frame, creating a continuous rotation effect for the cube
+    // theta += 0.5;
 
-    // Create x- and y-axis rotation matrices based on the current rotation angle, which will be used to transform the cube's vertex positions in 3D space
-    var xRotation = rotateX(theta);
-    var yRotation = rotateY(theta);
+    // // Create x- and y-axis rotation matrices based on the current rotation angle, which will be used to transform the cube's vertex positions in 3D space
+    // var xRotation = rotateX(theta);
+    // var yRotation = rotateY(theta);
 
-    // Combine the x- and y-axis rotations into one transformation matrix
-    var modelViewMatrix =
-        multiplyMatrices(
-            xRotation, // Rotate around x-axis
-            yRotation  // Rotate around y-axis
-        );
+    // // Combine the x- and y-axis rotations into one transformation matrix
+    // var modelViewMatrix =
+    //     multiplyMatrices(
+    //         xRotation, // Rotate around x-axis
+    //         yRotation  // Rotate around y-axis
+    //     );
+
+    // Calculate the eye position in 3D space using spherical coordinates based on the current rotation angles theta and phi
+    eye = vec3(
+        radius * Math.sin(theta) * Math.cos(phi),  // x-coordinate of the eye position
+        radius * Math.sin(theta) * Math.sin(phi),  // y-coordinate of the eye position
+        radius * Math.cos(theta)                    // z-coordinate of the eye position
+    );
+
+    // Create a model-view matrix using the eye position, the center of the cube (at), and the up direction (up)
+    modelViewMatrix = lookAt(
+        eye,  // Position of the camera in 3D space
+        at,   // Point the camera is looking at (center of the cube)
+        up    // Up direction for the camera
+    );
 
     // Create an orthographic projection matrix using the specified variables
     projectionMatrix = ortho(
@@ -392,7 +419,7 @@ function render()
     gl.uniformMatrix4fv(
         modelViewMatrixLoc,                 // Location of uModelViewMatrix in the shader program
         false,                              // WebGL expects this value to be false, indicating that the matrix is not transposed
-        new Float32Array(modelViewMatrix)   // Convert the matrix to WebGL-compatible data
+        flatten(modelViewMatrix)            // Convert the matrix to WebGL-compatible data
     );
 
     // Send the orthographic projection matrix to the vertex shader
