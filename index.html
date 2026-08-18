@@ -12,18 +12,18 @@
 
     <!-- Create the vertex shader (handles vertex positions and transformations) -->
     <script id="vertex-shader" type="x-shader/x-vertex">
-        // Receive the position and color data for each vertex from the WebGL buffer
-        // "attribute" identifies data that can be different for each vertex 
-        attribute vec4 aPosition;
-        attribute vec4 aColor;
+        // Receive the position and color data for each vertex from the WebGL buffers
+        // "in" identifies data that can be different for each vertex
+        in vec4 aPosition;
+        in vec4 aColor;
 
         // Store the model-view matrix for transforming vertex positions (rotating the cube)
         // "uniform" means the same matrix is used for every vertex
         uniform mat4 uModelViewMatrix;
 
         // Pass the vertex color from the vertex shader to the fragment shader
-        // "varying" allows the color to be interpolated between vertices
-        varying vec4 vColor;
+        // "out" identifies data that will be passed to the next stage of the pipeline (the fragment shader)
+        out vec4 vColor;
 
         // Main function that runs for each vertex
         void main()
