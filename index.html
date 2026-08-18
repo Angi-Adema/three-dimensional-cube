@@ -12,6 +12,9 @@
 
     <!-- Create the vertex shader (handles vertex positions and transformations) -->
     <script id="vertex-shader" type="x-shader/x-vertex">
+        // Set the version of GLSL (OpenGL Shading Language) to 300 es for WebGL 2.0
+        #version 300 es
+
         // Receive the position and color data for each vertex from the WebGL buffers
         // "in" identifies data that can be different for each vertex
         in vec4 aPosition;
@@ -38,17 +41,23 @@
 
     <!-- Create the fragment shader (determines the color of each fragment) -->
     <script id="fragment-shader" type="x-shader/x-fragment">
+        // Set the version of GLSL (OpenGL Shading Language) to 300 es for WebGL 2.0
+        #version 300 es
+
         // Set medium floating-point precision for calculations in the fragment shader
         precision mediump float;
 
         // Receive the interpolated color passed from the vertex shader
-        varying vec4 vColor;
+        in vec4 vColor;
+
+        // Store the final color output for each fragment
+        out vec4 fragColor;
 
         // Main function that runs for each fragment
         void main()
         {
             // Set the final fragment color to the interpolated vertex color
-            gl_FragColor = vColor;
+            fColor = vColor;
         }
     </script>
 
