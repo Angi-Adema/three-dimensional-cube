@@ -8,7 +8,7 @@ var gl;
 var points = [];
 var colors = [];
 
-// Set camera distances and angles for the spherical coordinate system
+// Set camera distance and angles for the spherical coordinate system
 var radius = 1.0;
 var theta = 0.0;
 var phi = 0.0;
@@ -157,7 +157,7 @@ window.onload = function init()
     // Enable the aPosition attribute to allow the shader program to access the vertex position data for rendering
     gl.enableVertexAttribArray(aPosition);
 
-    //Find the model-view matrix uniform location so the camera transformation can be sent to the shader program
+    // Find the model-view matrix uniform location so the camera transformation can be sent to the shader program
     modelViewMatrixLoc =
         gl.getUniformLocation(
             program,
@@ -171,7 +171,7 @@ window.onload = function init()
             "uProjectionMatrix"
         );
     
-    // Event handlers for the sliders taken from Angel and Schreiner's Ch. 5 codebase
+    // Event handlers for the sliders taken from Angel and Shreiner's Ch. 5 codebase
     // Update the near and far clipping planes when the depth slider changes
     document.getElementById("depthSlider").onchange = function(event)
     {
@@ -315,7 +315,7 @@ function createShaderProgram()
     return program;
 }
 
-// Draw one frame of the cube and continuously update the interactive viewer
+// Render the cube using the current camera position and projection settings, and request the next frame to be drawn
 function render()
 {
     // Clear the previous frame's color and depth information to prepare for drawing the new frame
