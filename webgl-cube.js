@@ -11,8 +11,9 @@ var colors = [];
 // Store the current rotation angle of the cube, initially set to 0.0 degrees
 var theta = 0.0;
 
-// Declare a variable to hold the location of the model-view matrix uniform in the shader program
+// Store the shader locations for the model-view and the projection matrices, which will be used to transform the cube's vertex positions in 3D space
 var modelViewMatrixLoc;
+var projectionMatrixLoc;
 
 // Create the eight vertices or corners of the cube as 4D vertex positions (x, y, z, w)
 var vertices = [
