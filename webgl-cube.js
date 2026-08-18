@@ -45,14 +45,14 @@ window.onload = function init()
     // Retrieve canvas element from the HTML document by its ID
     var canvas = document.getElementById("glCanvas");
 
-    // Create the WebGL rendering context and store it in the global variable established above
-    gl = canvas.getContext("webgl");
+    // Create the WebGL 2.0 rendering context and store it in the global variable established above
+    gl = canvas.getContext("webgl2");
 
-    // Confirm if the WebGL context was successfully created; if not, display an alert to the user indicating that WebGL is not available in their browser
+    // Confirm if the WebGL 2.0 context was successfully created; if not, display an alert to the user indicating that WebGL is not available in their browser
     if (!gl)
     {
-        // Display an alert if WebGL is not available in the user's browser
-        alert("WebGL is not available.");
+        // Display an alert if WebGL 2.0 is not available in the user's browser
+        alert("WebGL 2.0 is not available.");
     }
 
     // Generate the six sides of the cube placing their vertex positions and colors into the points and colors arrays
