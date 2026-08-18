@@ -19,9 +19,10 @@
         in vec4 aPosition;
         in vec4 aColor;
 
-        // Store the model-view matrix for transforming vertex positions (rotating the cube)
+        // Store the matrices used for transforming vertex positions (rotating the cube)
         // "uniform" means the same matrix is used for every vertex
         uniform mat4 uModelViewMatrix;
+        uniform mat4 uProjectionMatrix;
 
         // Pass the vertex color from the vertex shader to the fragment shader
         // "out" identifies data that will be passed to the next stage of the pipeline (the fragment shader)
@@ -30,8 +31,8 @@
         // Main function that runs for each vertex
         void main()
         {
-            // Multiply the vertex position by the model-view matrix and store the transformed position
-            gl_Position = uModelViewMatrix * aPosition;
+            // Apply the model-view transformation followed by the projection transformation to the vertex position
+            gl_Position = uProjectionMatrix * uModelViewMatrix * aPosition;
 
             // Assign the current vertex color to vColor so it can be passed to the fragment shader
             vColor = aColor;
