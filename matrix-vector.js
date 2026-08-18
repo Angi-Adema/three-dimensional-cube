@@ -496,7 +496,7 @@ function flatten( v )
     if(isMatrix(v)) {
 
         var floats = new Float32Array(v.length*v.length);
-        for(var i =0; i<v.length; i++) for(j=0;j<v.length; j++) {
+        for(var i=0; i<v.length; i++) for(j=0;j<v.length; j++) {
           floats[i*v.length+j] = v[j][i];
         }
         return floats;
