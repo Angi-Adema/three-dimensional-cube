@@ -173,10 +173,50 @@ window.onload = function init()
             program,
             "uProjectionMatrix"
         );
+    
+    // Event handlers for the sliders taken from Angel and Schreiner's Ch. 5 codebase
+    // Update the near and far clipping planes when the depth slider changes
+    document.getElementById("depthSlider").onchange = function(event)
+    {
+        far = event.target.value / 2;
+        near = -event.target.value / 2;
+    };
 
-    // Draw the first frame and start the continuous animation loop
-    render();
-};
+    // Update the camera's distance from the origin
+    document.getElementById("radiusSlider").onchange = function(event)
+    {
+        radius = event.target.value;
+    };
+
+    // Update the camera's theta angle and convert degrees to radians
+    document.getElementById("thetaSlider").onchange = function(event)
+    {
+        theta = event.target.value * Math.PI / 180.0;
+    };
+
+    // Update the camera's phi angle and convert degrees to radians
+    document.getElementById("phiSlider").onchange = function(event)
+    {
+        phi = event.target.value * Math.PI / 180.0;
+    };
+
+    // Update the horizontal boundaries of the orthographic viewing volume
+    document.getElementById("widthSlider").onchange = function(event)
+    {
+        right = event.target.value / 2;
+        left = -event.target.value / 2;
+    };
+
+    // Update the vertical boundaries of the orthographic viewing volume
+    document.getElementById("heightSlider").onchange = function(event)
+    {
+        ytop = event.target.value / 2;
+        bottom = -event.target.value / 2;
+    };
+
+        // Draw the first frame and start the continuous animation loop
+        render();
+    };
 
 // Generate all six faces of the cube by calling the quad function for each face, specifying the indices of the vertices that make up each face
 function colorCube()
