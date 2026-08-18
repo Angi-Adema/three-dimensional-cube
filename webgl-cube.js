@@ -8,7 +8,7 @@ var gl;
 var points = [];
 var colors = [];
 
-// Create variables to hold the rotation angles for the cube around the x- and y-axes 
+// Set camera distances and angles for the spherical coordinate system
 var radius = 1.0;
 var theta = 0.0;
 var phi = 0.0;
@@ -31,9 +31,6 @@ var bottom = -1.0;
 var ytop = 1.0;
 var near = -1.0;
 var far = 1.0;
-
-// Create a variable to hold the orthographic projection matrix, used to transform the cube's vertex positions from 3D to 2D screen space
-var projectionMatrix;
 
 // Store the shader locations for the model-view and the projection matrices, which will be used to transform the cube's vertex positions in 3D space
 var modelViewMatrixLoc;
@@ -160,7 +157,7 @@ window.onload = function init()
     // Enable the aPosition attribute to allow the shader program to access the vertex position data for rendering
     gl.enableVertexAttribArray(aPosition);
 
-    //Find the model-view matrix uniform location in the shader program and store it so the rotation matrix can be sent to the shader
+    //Find the model-view matrix uniform location so the camera transformation can be sent to the shader program
     modelViewMatrixLoc =
         gl.getUniformLocation(
             program,
@@ -214,7 +211,7 @@ window.onload = function init()
         bottom = -event.target.value / 2;
     };
 
-        // Draw the first frame and start the continuous animation loop
+        // Draw the first frame and start the continuous rendering loop
         render();
     };
 
@@ -246,27 +243,6 @@ function quad(a, b, c, d)
         colors.push(vertexColors[a]);        // Give each vertex of this face the same color, the first vertex index (a) sets the face color
     }
 }
-
-// flatten() function commented out as this function is now handled by the textbook version in matrix-vector.js.
-// // Convert the nested arrays into a Float32Array required by WebGL
-// function flatten(array)
-// {
-//     // Create an empty array to hold the flattened data
-//     var result = [];
-
-//     // Loop through each item in the array
-//     for (var i = 0; i < array.length; i++)
-//     {
-//         // Loop through each value in the item
-//         for (var j = 0; j < array[i].length; j++)
-//         {
-//             // Push the value into the result array
-//             result.push(array[i][j]);
-//         }
-//     }
-//     // Convert the result array into a Float32Array and return it, which is the format required by WebGL for buffer data
-//     return new Float32Array(result);
-// }
 
 // Create, compile, and link the vertex and fragment shaders
 function createShaderProgram()
@@ -339,76 +315,7 @@ function createShaderProgram()
     return program;
 }
 
-// Create a 4x4 matrix that represents rotation of the cube around the x-axis
-function rotateX(angle)
-{
-    // Convert the rotation angle from degrees to radians as JavaScript's Math functions use radians
-    var radians = angle * Math.PI / 180.0;
-
-    // Calculate cosine and sine rotation angle values
-    var c = Math.cos(radians);
-    var s = Math.sin(radians);
-
-    // Return the 4x4 x-axis rotation matrix
-    return [
-        1, 0, 0, 0,
-        0, c, s, 0,
-        0, -s, c, 0,
-        0, 0, 0, 1
-    ];
-}
-
-// Create a 4x4 matrix representing rotation around the y-axis
-function rotateY(angle)
-{
-    // Convert degrees to radians for JavaScript's Math functions
-    var radians = angle * Math.PI / 180.0;
-
-    // Calculate cosine and sine values of the rotation angle
-    var c = Math.cos(radians);
-    var s = Math.sin(radians);
-
-    // Return the 4x4 y-axis rotation matrix
-    return [
-        c, 0, -s, 0,
-        0, 1, 0, 0,
-        s, 0, c, 0,
-        0, 0, 0, 1
-    ];
-}
-
-// Multiply two 4x4 matrices and return the resulting 4x4 matrix
-function multiplyMatrices(a, b)
-{
-    // Create an array with 16 positions to store the resulting 4x4 matrix
-    var result = new Array(16);
-
-    // Loop through each of the 4 matrix rows
-    for (var row = 0; row < 4; row++)
-    {
-        // Loop through each of the 4 matrix columns
-        for (var column = 0; column < 4; column++)
-        {
-            var sum = 0;  // Start the value for the current result position at 0
-
-            // Multiply the matching row and column values and add the four products together to get the value for the current position in the result matrix
-            for (var i = 0; i < 4; i++)
-            {
-                sum +=
-                    a[i * 4 + row] *
-                    b[column * 4 + i];
-            }
-
-            // Store the calculated values in the appropriate position of the resulting matrix
-            result[column * 4 + row] = sum;
-        }
-    }
-
-    // Return the completed combined transformation matrix
-    return result;
-}
-
-// Draw one frame of the cube and continuously repeat the process to animate the rotating cube
+// Draw one frame of the cube and continuously update the interactive viewer
 function render()
 {
     // Clear the previous frame's color and depth information to prepare for drawing the new frame
@@ -417,21 +324,7 @@ function render()
         gl.DEPTH_BUFFER_BIT
     );
 
-    // // Update the rotation angle for the next frame, creating a continuous rotation effect for the cube
-    // theta += 0.5;
-
-    // // Create x- and y-axis rotation matrices based on the current rotation angle, which will be used to transform the cube's vertex positions in 3D space
-    // var xRotation = rotateX(theta);
-    // var yRotation = rotateY(theta);
-
-    // // Combine the x- and y-axis rotations into one transformation matrix
-    // var modelViewMatrix =
-    //     multiplyMatrices(
-    //         xRotation, // Rotate around x-axis
-    //         yRotation  // Rotate around y-axis
-    //     );
-
-    // Calculate the eye position in 3D space using spherical coordinates based on the current rotation angles theta and phi
+    // Calculate the camera position in 3D space using radius, theta, and phi to create a spherical coordinate system for the viewer
     eye = vec3(
         radius * Math.sin(theta) * Math.cos(phi),  // x-coordinate of the eye position
         radius * Math.sin(theta) * Math.sin(phi),  // y-coordinate of the eye position
@@ -453,9 +346,9 @@ function render()
         ytop,   // Top clipping plane
         near,   // Near clipping plane
         far     // Far clipping plane
-    )
+    );
 
-    // Send the combined transformation matrix to the uModelViewMatrix uniform in the vertex shader
+    // Send the camera-based model-view matrix to the vertex shader so that the cube's vertex positions can be transformed from model space to view space
     gl.uniformMatrix4fv(
         modelViewMatrixLoc,                 // Location of uModelViewMatrix in the shader program
         false,                              // WebGL expects this value to be false, indicating that the matrix is not transposed
@@ -476,6 +369,114 @@ function render()
         36             // Draw all 36 vertices or 12 triangles that make up the cube's six faces
     );
 
-    // Request the browser to call render again before displaying the next frame as this will create the continuous rotation animation
+    // Request the browser to render another frame so slider changes appear on the canvas
     requestAnimationFrame(render);
 }
+
+// CODE NO LONGER USED
+
+// flatten() function commented out as this function is now handled by the textbook version in matrix-vector.js.
+// // Convert the nested arrays into a Float32Array required by WebGL
+// function flatten(array)
+// {
+//     // Create an empty array to hold the flattened data
+//     var result = [];
+
+//     // Loop through each item in the array
+//     for (var i = 0; i < array.length; i++)
+//     {
+//         // Loop through each value in the item
+//         for (var j = 0; j < array[i].length; j++)
+//         {
+//             // Push the value into the result array
+//             result.push(array[i][j]);
+//         }
+//     }
+//     // Convert the result array into a Float32Array and return it, which is the format required by WebGL for buffer data
+//     return new Float32Array(result);
+// }
+
+// No longer need rotation code as we are now utilizing a viewer
+    // // Update the rotation angle for the next frame, creating a continuous rotation effect for the cube
+    // theta += 0.5;
+
+    // // Create x- and y-axis rotation matrices based on the current rotation angle, which will be used to transform the cube's vertex positions in 3D space
+    // var xRotation = rotateX(theta);
+    // var yRotation = rotateY(theta);
+
+    // // Combine the x- and y-axis rotations into one transformation matrix
+    // var modelViewMatrix =
+    //     multiplyMatrices(
+    //         xRotation, // Rotate around x-axis
+    //         yRotation  // Rotate around y-axis
+    //     );
+
+    // No longer need the rotaional axes as we are now utilizing a viewer
+//     // Create a 4x4 matrix that represents rotation of the cube around the x-axis
+// function rotateX(angle)
+// {
+//     // Convert the rotation angle from degrees to radians as JavaScript's Math functions use radians
+//     var radians = angle * Math.PI / 180.0;
+
+//     // Calculate cosine and sine rotation angle values
+//     var c = Math.cos(radians);
+//     var s = Math.sin(radians);
+
+//     // Return the 4x4 x-axis rotation matrix
+//     return [
+//         1, 0, 0, 0,
+//         0, c, s, 0,
+//         0, -s, c, 0,
+//         0, 0, 0, 1
+//     ];
+// }
+
+// // Create a 4x4 matrix representing rotation around the y-axis
+// function rotateY(angle)
+// {
+//     // Convert degrees to radians for JavaScript's Math functions
+//     var radians = angle * Math.PI / 180.0;
+
+//     // Calculate cosine and sine values of the rotation angle
+//     var c = Math.cos(radians);
+//     var s = Math.sin(radians);
+
+//     // Return the 4x4 y-axis rotation matrix
+//     return [
+//         c, 0, -s, 0,
+//         0, 1, 0, 0,
+//         s, 0, c, 0,
+//         0, 0, 0, 1
+//     ];
+// }
+
+// // Multiply two 4x4 matrices and return the resulting 4x4 matrix
+// function multiplyMatrices(a, b)
+// {
+//     // Create an array with 16 positions to store the resulting 4x4 matrix
+//     var result = new Array(16);
+
+//     // Loop through each of the 4 matrix rows
+//     for (var row = 0; row < 4; row++)
+//     {
+//         // Loop through each of the 4 matrix columns
+//         for (var column = 0; column < 4; column++)
+//         {
+//             var sum = 0;  // Start the value for the current result position at 0
+
+//             // Multiply the matching row and column values and add the four products together to get the value for the current position in the result matrix
+//             for (var i = 0; i < 4; i++)
+//             {
+//                 sum +=
+//                     a[i * 4 + row] *
+//                     b[column * 4 + i];
+//             }
+
+//             // Store the calculated values in the appropriate position of the resulting matrix
+//             result[column * 4 + row] = sum;
+//         }
+//     }
+
+//     // Return the completed combined transformation matrix
+//     return result;
+// }
