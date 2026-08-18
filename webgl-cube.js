@@ -175,25 +175,26 @@ function quad(a, b, c, d)
     }
 }
 
-// Convert the nested arrays into a Float32Array required by WebGL
-function flatten(array)
-{
-    // Create an empty array to hold the flattened data
-    var result = [];
+// flatten() function commented out as this function is now handled by the textbook version in matrix-vector.js.
+// // Convert the nested arrays into a Float32Array required by WebGL
+// function flatten(array)
+// {
+//     // Create an empty array to hold the flattened data
+//     var result = [];
 
-    // Loop through each item in the array
-    for (var i = 0; i < array.length; i++)
-    {
-        // Loop through each value in the item
-        for (var j = 0; j < array[i].length; j++)
-        {
-            // Push the value into the result array
-            result.push(array[i][j]);
-        }
-    }
-    // Convert the result array into a Float32Array and return it, which is the format required by WebGL for buffer data
-    return new Float32Array(result);
-}
+//     // Loop through each item in the array
+//     for (var i = 0; i < array.length; i++)
+//     {
+//         // Loop through each value in the item
+//         for (var j = 0; j < array[i].length; j++)
+//         {
+//             // Push the value into the result array
+//             result.push(array[i][j]);
+//         }
+//     }
+//     // Convert the result array into a Float32Array and return it, which is the format required by WebGL for buffer data
+//     return new Float32Array(result);
+// }
 
 // Create, compile, and link the vertex and fragment shaders
 function createShaderProgram()
