@@ -11,6 +11,17 @@ var colors = [];
 // Store the current rotation angle of the cube, initially set to 0.0 degrees
 var theta = 0.0;
 
+// Create the orthographic viewing volume variables
+var left = -1.0;
+var right = 1.0;
+var bottom = -1.0;
+var ytop = 1.0;
+var near = -1.0;
+var far = 1.0;
+
+// Create a variable to hold the orthographic projection matrix, used to transform the cube's vertex positions from 3D to 2D screen space
+var projectionMatrix;
+
 // Store the shader locations for the model-view and the projection matrices, which will be used to transform the cube's vertex positions in 3D space
 var modelViewMatrixLoc;
 var projectionMatrixLoc;
@@ -141,6 +152,13 @@ window.onload = function init()
         gl.getUniformLocation(
             program,
             "uModelViewMatrix"
+        );
+
+    // Find the projection matrix uniform location in the shader program and store it so the projection matrix can be sent to the shader
+    projectionMatrixLoc =
+        gl.getUniformLocation(
+            program,
+            "uProjectionMatrix"
         );
 
     // Draw the first frame and start the continuous animation loop
@@ -360,11 +378,28 @@ function render()
             yRotation  // Rotate around y-axis
         );
 
+    // Create an orthographic projection matrix using the specified variables
+    projectionMatrix = ortho(
+        left,   // Left clipping plane
+        right,  // Right clipping plane
+        bottom, // Bottom clipping plane
+        ytop,   // Top clipping plane
+        near,   // Near clipping plane
+        far     // Far clipping plane
+    )
+
     // Send the combined transformation matrix to the uModelViewMatrix uniform in the vertex shader
     gl.uniformMatrix4fv(
         modelViewMatrixLoc,                 // Location of uModelViewMatrix in the shader program
         false,                              // WebGL expects this value to be false, indicating that the matrix is not transposed
         new Float32Array(modelViewMatrix)   // Convert the matrix to WebGL-compatible data
+    );
+
+    // Send the orthographic projection matrix to the vertex shader
+    gl.uniformMatrix4fv(
+        projectionMatrixLoc,                 // Location of uProjectionMatrix in the shader program
+        false,                               // WebGL expects this value to be false, indicating that the matrix is not transposed
+        flatten(projectionMatrix)            // Convert the matrix to WebGL-compatible data  
     );
 
     // Draw the cube using all 36 vertices created by the colorCube and quad
