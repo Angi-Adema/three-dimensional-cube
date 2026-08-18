@@ -17,8 +17,8 @@ var phi = 0.0;
 var eye;
 
 // Ensure the camera is always looking at the center of the cube, which is at the origin (0, 0, 0) with y-axis as the up direction
-var at = vec3[0.0, 0.0, 0.0];
-var up = vec3[0.0, 1.0, 0.0];
+const at = vec3[0.0, 0.0, 0.0];
+const up = vec3[0.0, 1.0, 0.0];
 
 // Create variables to hold the model-view and projection matrices
 var modelViewMatrix;
