@@ -7,6 +7,87 @@
 </head>
 
 <body>
+    <!-- Create the viewing sliders (taken from Angel and Schreiner Ch. 5 code) -->
+<h2>Interactive Orthographic Viewer</h2>
+
+<!-- Control the distance between the near and far clipping planes -->
+<div>
+    <label for="depthSlider">Depth: 0.05</label>
+    <input
+        id="depthSlider"
+        type="range"
+        min="0.05"
+        max="3"
+        step="0.1"
+        value="2">
+    <span>3</span>
+</div>
+
+<!-- Control the camera's distance from the cube -->
+<div>
+    <label for="radiusSlider">Radius: 0.05</label>
+    <input
+        id="radiusSlider"
+        type="range"
+        min="0.05"
+        max="2"
+        step="0.1"
+        value="1">
+    <span>2</span>
+</div>
+
+<!-- Control the camera's theta angle -->
+<div>
+    <label for="thetaSlider">Theta: -90</label>
+    <input
+        id="thetaSlider"
+        type="range"
+        min="-90"
+        max="90"
+        step="5"
+        value="0">
+    <span>90</span>
+</div>
+
+<!-- Control the camera's phi angle -->
+<div>
+    <label for="phiSlider">Phi: -90</label>
+    <input
+        id="phiSlider"
+        type="range"
+        min="-90"
+        max="90"
+        step="5"
+        value="0">
+    <span>90</span>
+</div>
+
+<!-- Control the width of the orthographic viewing volume -->
+<div>
+    <label for="widthSlider">Width: 0</label>
+    <input
+        id="widthSlider"
+        type="range"
+        min="0"
+        max="20"
+        step="1"
+        value="10">
+    <span>20</span>
+</div>
+
+<!-- Control the height of the orthographic viewing volume -->
+<div>
+    <label for="heightSlider">Height: 0</label>
+    <input
+        id="heightSlider"
+        type="range"
+        min="0"
+        max="20"
+        step="1"
+        value="10">
+    <span>20</span>
+</div>
+
     <!-- Declare the canvas the cube will be drawn on -->
     <canvas id="glCanvas" width="500" height="500"></canvas>
 
