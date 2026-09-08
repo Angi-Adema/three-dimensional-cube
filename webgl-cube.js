@@ -34,6 +34,8 @@ var wireframePoints = [];
 var vBuffer;
 var wireframeBuffer;
 var aPosition;
+var cBuffer;
+var aColor;
 
 // Set camera distance and angles for the spherical coordinate system
 var radius = 1.0;
@@ -133,7 +135,7 @@ window.onload = function init()
     gl.useProgram(program);
 
     // Create a WebGL buffer for storing the cube's color data, which will be sent to the GPU for rendering
-    var cBuffer = gl.createBuffer();
+    cBuffer = gl.createBuffer();
 
     // Set the color buffer as the active ARRAY_BUFFER
     gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
@@ -146,7 +148,7 @@ window.onload = function init()
     );
 
     // Locate the aColor attribute in the shader program
-    var aColor = gl.getAttribLocation(program, "aColor");
+    aColor = gl.getAttribLocation(program, "aColor");
     
     // Specify how WebGL should read the color data from the active color buffer
     gl.vertexAttribPointer(
@@ -260,7 +262,7 @@ window.onload = function init()
     document.getElementById("viewButton").onclick = function()
     {
         wireframeMode = !wireframeMode;   // If wireframeMode is equal to false, it becomes True and vice versa
-    }
+    };
 
         // Draw the first frame and start the continuous rendering loop
         render();
@@ -430,12 +432,79 @@ function render()
         flatten(projectionMatrix)            // Convert the matrix to WebGL-compatible data  
     );
 
-    // Draw the cube using all 36 vertices created by the colorCube and quad
-    gl.drawArrays(
-        gl.TRIANGLES,  // Each group of three vertices represents one triangle (2 triangles per cube face)
-        0,             // Start drawing from the first vertex in the points array
-        36             // Draw all 36 vertices or 12 triangles that make up the cube's six faces
+// Check whether the wireframe viewing mode is active
+if (wireframeMode)
+{
+    // Bind the wireframe vertex-position buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, wireframeBuffer);
+
+    // Tell WebGL how to read the wireframe vertex positions
+    gl.vertexAttribPointer(
+        aPosition,   // Attribute location for vertex positions
+        4,           // Number of components per vertex (x, y, z, w)
+        gl.FLOAT,    // Data type of each component in the vertex attribute
+        false,       // Whether to normalize the data (false means no normalization)
+        0,           // Offset in the buffer where the vertex data starts
+        0            // Starting index in the array of vertex positions
     );
+
+    // Disable the color attribute array so a single color can be used for all wireframe vertices
+    gl.disableVertexAttribArray(aColor);
+
+    // Set the wireframe color to white
+    gl.vertexAttrib4f(
+        aColor,   // Attribute location for vertex colors
+        1.0,      // Red component of the wireframe color
+        1.0,      // Green component of the wireframe color
+        1.0,      // Blue component of the wireframe color
+        1.0       // Alpha component of the wireframe color
+    );
+
+    // Draw the 12 cube edges using 24 vertex positions
+    gl.drawArrays(
+        gl.LINES,   // Draw lines for the wireframe cube
+        0,          // Starting index in the array of vertex positions for the wireframe cube
+        24          // Number of vertex positions for the wireframe cube
+    );
+
+} else {
+
+    // Bind the solid cube's vertex-position buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+
+    // Tell WebGL how to read the solid cube's vertex positions
+    gl.vertexAttribPointer(
+        aPosition,   // Attribute location for vertex positions
+        4,           // Number of components per vertex (x, y, z, w)
+        gl.FLOAT,    // Data type of each component in the vertex attribute
+        false,       // Whether to normalize the data (false means no normalization)
+        0,           // Offset in the buffer where the vertex data starts
+        0            // Start reading from the beginning of the buffer
+    );
+
+    // Bind the solid cube's color buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+
+    // Tell WebGL how to read the cube's color data
+    gl.vertexAttribPointer(
+        aColor,      // Attribute location for vertex colors
+        4,           // Number of components per vertex color (r, g, b, a)
+        gl.FLOAT,    // Data type of each component in the vertex color attribute
+        false,       // Whether to normalize the color data (false means no normalization)
+        0,           // Offset in the buffer where the color data starts
+        0            // Starting index in the array of vertex colors for the solid cube
+    );
+
+    // Re-enable the color attribute array for the solid cube
+    gl.enableVertexAttribArray(aColor);
+
+    // Draw the solid cube using all 36 triangle vertices
+    gl.drawArrays(
+        gl.TRIANGLES,    // Draw triangles for the solid cube
+        0,               // Starting index in the array of vertex positions for the solid cube
+        36               // Number of vertex positions for the solid cube
+    );
+}
 
     // Request the browser to render another frame so slider changes appear on the canvas
     requestAnimationFrame(render);
