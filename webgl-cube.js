@@ -256,6 +256,12 @@ window.onload = function init()
         bottom = -event.target.value / 2;
     };
 
+    // Toggle between solid and wireframe rendering modes when the view button is clicked
+    document.getElementById("viewButton").onclick = function()
+    {
+        wireframeMode = !wireframeMode;   // If wireframeMode is equal to false, it becomes True and vice versa
+    }
+
         // Draw the first frame and start the continuous rendering loop
         render();
     };
