@@ -3,11 +3,18 @@
  * were adapted from the ortho2.js example provided with Chapter 5 of Interactive 
  * Computer Graphics by Angel and Shreiner.
  * 
- * Source:
- * https://www.interactivecomputergraphics.com/Code/05/ortho2.js
+ * The colored-cube logic was adapted from Chapter 4 textbook examples and
+ * project files associated with the textbook. 
  * 
- * The colored-cube logic was adapted from the Chapter 4 textbook examples as well
- * as project files provided with the textbook.
+ * The button interaction used for switching viewing modes follows the 
+ * event-driven button approach presented in Chapter 3 of the textbook. The wireframe
+ * viewer was implemented using WebGL line rendering with the existing
+ * cube vertices and edges.
+ * 
+ * Source:
+ * Angel, E., & Shreiner, D. (2020). Interactive Computer Graphics: A Top-Down Approach with WebGL (8th ed.). Pearson.
+ * https://www.interactivecomputergraphics.com/Code/05/ortho2.js
+ * https://www.interactivecomputergraphics.com/8E/
  */
 
 // Use strict helps catch errors while coding
@@ -57,7 +64,7 @@ var modelViewMatrixLoc;
 var projectionMatrixLoc;
 
 // Boolean flag to toggle between wireframe and solid rendering modes
-var wireFrameMode = false;
+var wireframeMode = false;
 
 // Create the eight vertices or corners of the cube as 4D vertex positions (x, y, z, w)
 var vertices = [
@@ -102,6 +109,9 @@ window.onload = function init()
 
     // Generate the six sides of the cube placing their vertex positions and colors into the points and colors arrays
     colorCube();
+
+    // Generate the 12 edges of the cube used for the wireframe
+    wireframeCube();
 
     // Define the canvas area that WebGL will use to render the cube. 
     gl.viewport(
