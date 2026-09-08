@@ -20,6 +20,14 @@ var gl;
 var points = [];
 var colors = [];
 
+// Create an array to store the vertex positions for drawing the 12 edges of the cube
+var wireframePoints = [];
+
+// Store the WebGL buffers and position attribute location for the cube's vertex positions
+var vBuffer;
+var wireframeBuffer;
+var aPosition;
+
 // Set camera distance and angles for the spherical coordinate system
 var radius = 1.0;
 var theta = 0.0;
@@ -47,6 +55,9 @@ var far = 1.0;
 // Store the shader locations for the model-view and the projection matrices, which will be used to transform the cube's vertex positions in 3D space
 var modelViewMatrixLoc;
 var projectionMatrixLoc;
+
+// Boolean flag to toggle between wireframe and solid rendering modes
+var wireFrameMode = false;
 
 // Create the eight vertices or corners of the cube as 4D vertex positions (x, y, z, w)
 var vertices = [
@@ -141,7 +152,7 @@ window.onload = function init()
     gl.enableVertexAttribArray(aColor);
 
     // Create a WebGL buffer to store the cube's vertex positions
-    var vBuffer = gl.createBuffer();
+    vBuffer = gl.createBuffer();
 
     // Set the vertex-position buffer as the active ARRAY_BUFFER, allowing WebGL to know where to read the vertex position data from
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
@@ -154,8 +165,7 @@ window.onload = function init()
     );
 
     // Locate the aPosition attribute in the shader program
-    var aPosition =
-        gl.getAttribLocation(program, "aPosition");
+    aPosition = gl.getAttribLocation(program, "aPosition");
 
     // Specify how WebGL should read the vertex position data from the active position buffer
     gl.vertexAttribPointer(
@@ -168,6 +178,19 @@ window.onload = function init()
     );
     // Enable the aPosition attribute to allow the shader program to access the vertex position data for rendering
     gl.enableVertexAttribArray(aPosition);
+
+    // Create a WebGL buffer to store the wireframe cube's vertex positions
+    wireframeBuffer = gl.createBuffer();
+
+    // Bind the wireframe buffer as the active ARRAY_BUFFER so WebGL knows where to read the wireframe vertex data from
+    gl.bindBuffer(gl.ARRAY_BUFFER, wireframeBuffer);
+
+    // Copy the wireframe vertex positions data into the wireframe buffer using the flatten function to convert the points
+    gl.bufferData(
+        gl.ARRAY_BUFFER,           // Specify the target buffer type
+        flatten(wireframePoints),  // Convert the wireframe points array into a flat array suitable for WebGL
+        gl.STATIC_DRAW             // Data is static and will not change frequently
+    );
 
     // Find the model-view matrix uniform location so the camera transformation can be sent to the shader program
     modelViewMatrixLoc =
@@ -236,6 +259,23 @@ function colorCube()
     quad(6, 5, 1, 2);   // Top face (vertices: 6, 5, 1, 2)
     quad(4, 5, 6, 7);   // Back face (vertices: 4, 5, 6, 7)
     quad(5, 4, 0, 1);   // Left face (vertices: 5, 4, 0, 1)
+}
+
+// Generate the wireframe representation of the cube by creating the edges
+function wireframeCube() 
+{
+    // Define the 12 edges of the cube using pairs of vertex indices
+    var edges = [
+        0, 1,  1, 2,  2, 3,  3, 0,  // Front face edges
+        4, 5,  5, 6,  6, 7,  7, 4,  // Back face edges
+        0, 4,  1, 5,  2, 6,  3, 7   // Side edges connecting front and back faces
+    ];
+
+    // Loop through the edge indices and push the corresponding vertex positions into the wireframePoints array
+    for (var i = 0; i < edges.length; i++)
+    {
+        wireframePoints.push(vertices[edges[i]]);
+    }
 }
 
 // Divide one square cube face into two triangles
