@@ -444,8 +444,8 @@ if (wireframeMode)
         4,           // Number of components per vertex (x, y, z, w)
         gl.FLOAT,    // Data type of each component in the vertex attribute
         false,       // Whether to normalize the data (false means no normalization)
-        0,           // Offset in the buffer where the vertex data starts
-        0            // Starting index in the array of vertex positions
+        0,           // Stride between consecutive vertex positions (0 means tightly packed)
+        0            // Byte offset where the vertex data starts
     );
 
     // Disable the color attribute array so a single color can be used for all wireframe vertices
@@ -478,8 +478,8 @@ if (wireframeMode)
         4,           // Number of components per vertex (x, y, z, w)
         gl.FLOAT,    // Data type of each component in the vertex attribute
         false,       // Whether to normalize the data (false means no normalization)
-        0,           // Offset in the buffer where the vertex data starts
-        0            // Start reading from the beginning of the buffer
+        0,           // Stride between consecutive vertex positions (0 means tightly packed)
+        0            // Byte offset where the vertex data starts
     );
 
     // Bind the solid cube's color buffer
@@ -490,9 +490,9 @@ if (wireframeMode)
         aColor,      // Attribute location for vertex colors
         4,           // Number of components per vertex color (r, g, b, a)
         gl.FLOAT,    // Data type of each component in the vertex color attribute
-        false,       // Whether to normalize the color data (false means no normalization)
-        0,           // Offset in the buffer where the color data starts
-        0            // Starting index in the array of vertex colors for the solid cube
+        false,       // Whether to normalize the data (false means no normalization)
+        0,           // Stride between consecutive vertex positions (0 means tightly packed)
+        0            // Byte offset where the vertex data starts
     );
 
     // Re-enable the color attribute array for the solid cube
